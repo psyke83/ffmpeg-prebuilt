@@ -16,8 +16,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Checkout media-autobuild_suite
+        uses: actions/checkout@v2
         with:
-          submodules: recursive
+          repository: m-ab-s/media-autobuild_suite
+          path: media-autobuild_suite
 
       - name: Cache msys64
         id: cache-msys64
@@ -30,15 +34,15 @@ jobs:
         shell: pwsh
         run: cp build/*.* media-autobuild_suite/build/
 
-#      - name: Replace do_prompt
-#        shell: pwsh
-#        working-directory: media-autobuild_suite
-#        run: sed -i 's/do_prompt /echo /g' build/media-suite_helper.sh build/media-suite_compile.sh
-
-      - name: Compile the suite
+      - name: Replace do_prompt
         shell: pwsh
         working-directory: media-autobuild_suite
-        run: echo y|./media-autobuild_suite.bat
+        run: sed -i 's/do_prompt /echo /g' build/media-suite_helper.sh build/media-suite_compile.sh
+
+      - name: Compile the suite
+        shell: cmd
+        working-directory: media-autobuild_suite
+        run: media-autobuild_suite.bat
 
       - name: Create pre-compiled artifact
         shell: cmd
