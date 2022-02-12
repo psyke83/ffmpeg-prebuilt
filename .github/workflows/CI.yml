@@ -38,7 +38,7 @@ jobs:
       - name: Compile the suite
         shell: cmd
         working-directory: media-autobuild_suite
-        run: echo n|media-autobuild_suite.bat
+        run: media-autobuild_suite.bat
 
       - name: Create pre-compiled artifact
         shell: cmd
