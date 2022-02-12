@@ -36,9 +36,9 @@ jobs:
         run: sed -i 's/do_prompt /echo /g' build/media-suite_helper.sh build/media-suite_compile.sh
 
       - name: Compile the suite
-        shell: cmd
+        shell: pwsh
         working-directory: media-autobuild_suite
-        run: media-autobuild_suite.bat
+        run: echo y|./media-autobuild_suite.bat
 
       - name: Create pre-compiled artifact
         shell: cmd
