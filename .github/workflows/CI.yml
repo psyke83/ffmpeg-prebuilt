@@ -19,12 +19,12 @@ jobs:
         with:
           submodules: recursive
 
-#      - name: Cache msys64
-#        id: cache-msys64
-#        uses: actions/cache@v2
-#        with:
-#          path: media-autobuild_suite/msys64
-#          key: ffmpeg-msys64
+      - name: Cache msys64
+        id: cache-msys64
+        uses: actions/cache@v2
+        with:
+          path: media-autobuild_suite/msys64
+          key: ffmpeg-msys64
 
       - name: Copy sunshine-prebuilt config files
         shell: pwsh
@@ -38,7 +38,7 @@ jobs:
       - name: Compile the suite
         shell: cmd
         working-directory: media-autobuild_suite
-        run: media-autobuild_suite.bat
+        run: echo n|media-autobuild_suite.bat
 
       - name: Create pre-compiled artifact
         shell: cmd
