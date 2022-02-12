@@ -19,12 +19,12 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Cache msys64
-        id: cache-msys64
-        uses: actions/cache@v2
-        with:
-          path: media-autobuild_suite/msys64
-          key: ffmpeg-msys64
+#      - name: Cache msys64
+#        id: cache-msys64
+#        uses: actions/cache@v2
+#        with:
+#          path: media-autobuild_suite/msys64
+#          key: ffmpeg-msys64
 
       - name: Copy sunshine-prebuilt config files
         shell: pwsh
