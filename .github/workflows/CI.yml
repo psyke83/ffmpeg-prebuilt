@@ -64,8 +64,8 @@ jobs:
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         uses: ncipollo/release-action@v1  # https://github.com/ncipollo/release-action
         with:
-          name: Release ${{ github.ref }}
-          tag: ${{ github.ref }}
+          name: v1
+          tag: v1
           artifacts: pre-compiled.zip
           artifactContentType: application/zip
           token: ${{ secrets.GITHUB_TOKEN }}
