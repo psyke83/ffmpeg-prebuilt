@@ -1,8 +1,12 @@
-name: Pre Compiled ffmpeg
+name: CI
 
 on:
-  push:
   pull_request:
+    branches: [master, nightly]
+    types: [opened, synchronize, edited, reopened]
+  push:
+    branches: [master]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -10,7 +14,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 180
     steps:
-      - name: Checkout sunshine-prebuilt
+      - name: Checkout
         uses: actions/checkout@v2
 
       - name: Checkout media-autobuild_suite
@@ -34,7 +38,7 @@ jobs:
         shell: pwsh
         working-directory: media-autobuild_suite
         run: sed -i 's/do_prompt /echo /g' build/media-suite_helper.sh build/media-suite_compile.sh
-      
+
       - name: Compile the suite
         shell: cmd
         working-directory: media-autobuild_suite
@@ -44,49 +48,27 @@ jobs:
         shell: cmd
         run: scripts\create-pre-compiled.bat
 
-      - name: Upload pre-compiled artifact
+      - name: Upload Artifacts
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
         uses: actions/upload-artifact@v2
         with:
           name: pre-compiled
           path: pre-compiled/
-  
-  release:
-    name: "Release"
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/')
-    runs-on: windows-latest
-    timeout-minutes: 30
-    steps:
-      - name: Download pre-compiled artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: pre-compiled
-          path: pre-compiled/
-      
+
       - name: Create pre-compiled.zip
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         shell: pwsh
         run: Compress-Archive -Path pre-compiled\* -DestinationPath pre-compiled.zip
 
-      - name: Create Release
-        id: create-release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create/Update GitHub Release
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        uses: ncipollo/release-action@v1  # https://github.com/ncipollo/release-action
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          name: Release ${{ github.ref }}
+          tag: ${{ github.ref }}
+          artifacts: pre-compiled.zip
+          artifactContentType: application/zip
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
           body: |
             Prebuilt ffmpeg libs for sunshine
-          draft: false
-          prerelease: false
-
-      - name: Upload Release Asset
-        id: upload-release-asset 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: ./pre-compiled.zip
-          asset_name: pre-compiled.zip
-          asset_content_type: application/zip
