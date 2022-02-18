@@ -149,7 +149,6 @@ jobs:
             --enable-cuvid \
             --enable-lzma \
             --enable-nvenc \
-            --enable-schannel \
             --enable-zlib \
             --enable-ffnvcodec \
             --enable-nvdec \
