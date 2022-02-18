@@ -9,8 +9,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: "Build"
+  windows:
+    name: "Windows"
     runs-on: windows-latest
     timeout-minutes: 180
     steps:
@@ -67,6 +67,104 @@ jobs:
           name: v1
           tag: v1
           artifacts: pre-compiled.zip
+          artifactContentType: application/zip
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+          body: |
+            Prebuilt ffmpeg libs for sunshine
+
+  linux:
+    name: "Linux"
+    runs-on: ubuntu-20.04
+    # https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Dependencies
+        run: |
+          sudo apt-get update -qq && sudo apt-get -y install \
+            autoconf \
+            automake \
+            build-essential \
+            cmake \
+            git-core \
+            libass-dev \
+            libfreetype6-dev \
+            libgnutls28-dev \
+            libmp3lame-dev \
+            libsdl2-dev \
+            libtool \
+            libva-dev \
+            libvdpau-dev \
+            libvorbis-dev \
+            libxcb1-dev \
+            libxcb-shm0-dev \
+            libxcb-xfixes0-dev \
+            meson \
+            ninja-build \
+            pkg-config \
+            texinfo \
+            wget \
+            yasm \
+            zlib1g-dev
+
+          # ubuntu 20.04
+          sudo apt install libunistring-dev libaom-dev libdav1d-dev
+
+          # NASM
+          sudo apt-get install nasm
+
+          # libx264
+          sudo apt-get install libx264-dev
+
+          # libx265
+          sudo apt-get install libx265-dev libnuma-dev
+
+      - name: Build
+        run: |
+          mkdir -p ~/ffmpeg_sources ~/bin
+
+          cd ~/ffmpeg_sources && \
+          wget -O ffmpeg-snapshot.tar.bz2 https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 && \
+          tar xjvf ffmpeg-snapshot.tar.bz2 && \
+          cd ffmpeg && \
+          PATH="$HOME/bin:$PATH" PKG_CONFIG_PATH="$HOME/ffmpeg_build/lib/pkgconfig" ./configure \
+            --prefix="$HOME/ffmpeg_build" \
+            --pkg-config-flags="--static" \
+            --extra-cflags="-I$HOME/ffmpeg_build/include" \
+            --extra-ldflags="-L$HOME/ffmpeg_build/lib" \
+            --extra-libs="-lpthread -lm" \
+            --ld="g++" \
+            --bindir="$HOME/bin" \
+            --enable-gpl \
+            --enable-libx264 \
+            --enable-libx265 \
+          PATH="$HOME/bin:$PATH" make -j$(nproc) && \
+          make install && \
+          hash -r
+
+      - name: Upload Artifacts
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: pre-compiled-debian
+          path: |
+          ~/ffmpeg_build/include/
+          ~/ffmpeg_build/lib/
+
+      - name: Create pre-compiled-debian.zip
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        run: 7z a pre-compiled-debian.zip ~/ffmpeg_build/include ~/ffmpeg_build/lib
+
+      - name: Create/Update GitHub Release
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        uses: ncipollo/release-action@v1  # https://github.com/ncipollo/release-action
+        with:
+          name: v1
+          tag: v1
+          artifacts: pre-compiled-debian.zip
           artifactContentType: application/zip
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
