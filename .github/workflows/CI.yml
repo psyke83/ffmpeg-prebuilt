@@ -138,6 +138,7 @@ jobs:
             --enable-gpl \
             --enable-libx264 \
             --enable-libx265 \
+            && \
           PATH="$HOME/bin:$PATH" make -j$(nproc) && \
           make install && \
           hash -r
