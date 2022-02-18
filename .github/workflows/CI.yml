@@ -110,9 +110,6 @@ jobs:
             yasm \
             zlib1g-dev
 
-          # ubuntu 20.04
-          sudo apt install libunistring-dev libaom-dev libdav1d-dev
-
           # NASM
           sudo apt-get install nasm
 
