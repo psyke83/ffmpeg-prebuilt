@@ -113,6 +113,9 @@ jobs:
           # NASM
           sudo apt-get install nasm
 
+          # libopus
+          sudo apt-get install libopus-dev
+
           # libx264
           sudo apt-get install libx264-dev
 
@@ -153,6 +156,7 @@ jobs:
             --enable-ffnvcodec \
             --enable-nvdec \
             --enable-vaapi \
+            --enable-libopus \
             --enable-libx264 \
             --enable-libx265 \
             --disable-debug \
