@@ -12,7 +12,7 @@ jobs:
   windows:
     name: "Windows"
     runs-on: windows-latest
-    timeout-minutes: 180
+    timeout-minutes: 90
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -52,13 +52,13 @@ jobs:
         if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
         uses: actions/upload-artifact@v2
         with:
-          name: pre-compiled
+          name: pre-compiled-windows
           path: pre-compiled/
 
-      - name: Create pre-compiled.zip
+      - name: Create pre-compiled-windows.zip
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         shell: pwsh
-        run: Compress-Archive -Path pre-compiled\* -DestinationPath pre-compiled.zip
+        run: Compress-Archive -Path pre-compiled\* -DestinationPath pre-compiled-windows.zip
 
       - name: Create/Update GitHub Release
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
@@ -66,7 +66,7 @@ jobs:
         with:
           name: v1
           tag: v1
-          artifacts: pre-compiled.zip
+          artifacts: pre-compiled-windows.zip
           artifactContentType: application/zip
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
